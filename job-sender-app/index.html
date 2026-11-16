@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f5f4a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Job Sender">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Driver Job Sender</title>
+<style>
+  :root{
+    --bg:#f4f5f2; --card:#fff; --ink:#1d2421; --muted:#68716c; --line:#dfe3df;
+    --wa:#1f9d55; --wa-d:#17803f; --accent:#0f5f4a; --warn:#b4541a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  header{padding:calc(18px + env(safe-area-inset-top)) 16px 6px;max-width:720px;margin:0 auto}
+  header h1{font-size:20px;margin:0}
+  header p{margin:2px 0 0;color:var(--muted);font-size:13px}
+  nav{display:flex;gap:6px;max-width:720px;margin:10px auto 0;padding:0 16px}
+  nav button{flex:1;border:1px solid var(--line);background:#fff;padding:9px;border-radius:10px;font-weight:600;color:var(--muted);cursor:pointer}
+  nav button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  main{max-width:720px;margin:0 auto;padding:12px 16px calc(60px + env(safe-area-inset-bottom))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+  .card h2{font-size:14px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 10px}
+  label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:0 0 3px}
+  input,select,textarea{width:100%;font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
+  textarea{resize:vertical}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .full{grid-column:1/-1}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .btn{border:0;border-radius:10px;padding:11px 14px;font:inherit;font-weight:700;cursor:pointer;background:#e8ece9;color:var(--ink)}
+  .btn.primary{background:var(--accent);color:#fff}
+  .btn.wa{background:var(--wa);color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+  .btn.wa:hover{background:var(--wa-d)}
+  .btn.small{padding:7px 10px;font-size:13px}
+  .btn.danger{background:#fbe9e0;color:var(--warn)}
+  .big{width:100%;font-size:16px;padding:14px}
+  pre#preview{white-space:pre-wrap;word-break:break-word;background:#e9f6ee;border:1px solid #cbe8d6;border-radius:10px;padding:12px;margin:0 0 12px;font:14px/1.45 ui-monospace,Menlo,Consolas,monospace}
+  .hint{font-size:12px;color:var(--muted);margin:6px 0 0}
+  .msg{font-size:13px;margin-top:8px;color:var(--accent);min-height:1em}
+  .msg.warn{color:var(--warn)}
+  .drivers{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .drivers a{font-size:14px;padding:9px 12px}
+  .list-item{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px}
+  .list-item .head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .list-item strong{font-size:14px}
+  .rowpick{display:block;width:100%;text-align:left;margin-bottom:6px;background:#f2f5f3;border:1px solid var(--line);border-radius:9px;padding:9px;cursor:pointer;font:inherit}
+  .hidden{display:none}
+  .drop{border:2px dashed #b9c6bf;border-radius:12px;padding:18px;text-align:center;background:#f7faf8;cursor:pointer}
+  .drop.over{border-color:var(--accent);background:#e9f6ee}
+  .drop strong{display:block;font-size:15px}
+  .job{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:#fff}
+  .job.sel{border-color:var(--accent);box-shadow:0 0 0 2px #0f5f4a22}
+  .job.sent{background:#f3f7f4}
+  .job .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+  .job .title{font-weight:700;font-size:15px}
+  .job .meta{font-size:13px;color:var(--muted)}
+  .badge{font-size:12px;font-weight:700;padding:3px 8px;border-radius:99px;background:#e8ece9;color:var(--muted);white-space:nowrap}
+  .badge.ok{background:#d7f0e0;color:var(--wa-d)}
+  .badge.warn{background:#fbe9e0;color:var(--warn)}
+  .job pre{white-space:pre-wrap;word-break:break-word;background:#e9f6ee;border:1px solid #cbe8d6;border-radius:10px;padding:10px;margin:10px 0;font:13px/1.4 ui-monospace,Menlo,Consolas,monospace}
+  .job .acts{display:flex;flex-wrap:wrap;gap:6px}
+  .job .acts a,.job .acts button{font-size:13px;padding:8px 11px}
+  .summary{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+  .summary .count{font-weight:700}
+  @media (max-width:480px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Driver Job Sender</h1>
+  <p>Upload the booking sheet → every job becomes a message → send each to a driver or group.</p>
+</header>
+<nav>
+  <button data-tab="send" class="on">New job</button>
+  <button data-tab="tours">Tours</button>
+  <button data-tab="drivers">Drivers</button>
+</nav>
+<main>
+
+<!-- ============ SEND TAB ============ -->
+<section id="tab-send">
+  <div class="card">
+    <h2>1 · Load bookings</h2>
+    <label class="drop" id="drop" for="file">
+      <strong>Upload the Excel sheet</strong>
+      <span class="hint">Tap to choose the .xlsx / .xls / .csv file, or drop it here</span>
+    </label>
+    <input type="file" id="file" accept=".xlsx,.xls,.csv" class="hidden">
+    <details style="margin-top:10px">
+      <summary class="hint" style="cursor:pointer">Or paste rows / a booking email instead</summary>
+      <textarea id="paste" rows="4" style="margin-top:8px" placeholder="Copy the header row + booking rows from Excel, or a booking email, and paste here."></textarea>
+      <div class="row" style="margin-top:8px"><button class="btn primary small" id="parseBtn">Add from paste</button></div>
+    </details>
+    <div class="row" style="margin-top:10px">
+      <button class="btn small" id="addManual">+ Add a job by hand</button>
+      <button class="btn small danger" id="clearBtn">Clear list</button>
+    </div>
+    <div class="msg" id="parseMsg"></div>
+  </div>
+
+  <div class="card">
+    <div class="summary">
+      <h2 style="margin:0">2 · Jobs</h2>
+      <span class="count" id="jobCount"></span>
+    </div>
+    <div id="jobList"></div>
+    <div class="row" style="margin-top:4px">
+      <button class="btn small" id="copyBtn">Copy selected message</button>
+      <span class="msg" id="sendMsg" style="margin:0"></span>
+    </div>
+  </div>
+
+  <div class="card" id="editCard">
+    <h2 id="editTitle">Edit selected job</h2>
+    <div class="grid">
+      <div><label for="f-id">Booking ID</label><input id="f-id"></div>
+      <div><label for="f-job">Job no.</label><input id="f-job" inputmode="numeric" placeholder="e.g. 4"></div>
+      <div><label for="f-date">Date</label><input id="f-date" type="date"></div>
+      <div><label for="f-time">Time</label><input id="f-time" placeholder="9:00 am"></div>
+      <div><label for="f-adults">Adults</label><input id="f-adults" type="number" min="0"></div>
+      <div><label for="f-children">Children</label><input id="f-children" type="number" min="0"></div>
+      <div class="full"><label for="f-tour">Tour</label><select id="f-tour"></select></div>
+      <div class="full hidden" id="customWrap"><label for="f-custom">Job details (tour name)</label><input id="f-custom"></div>
+      <div class="full"><label for="f-pickup">Pick up</label><input id="f-pickup"></div>
+      <div><label for="f-name">Name</label><input id="f-name"></div>
+      <div><label for="f-hp">Hp no</label><input id="f-hp" inputmode="tel"></div>
+    </div>
+    <p class="hint">Changes update the job in the list straight away.</p>
+  </div>
+</section>
+
+<!-- ============ TOURS TAB ============ -->
+<section id="tab-tours" class="hidden">
+  <div class="card">
+    <h2>Add / edit tour</h2>
+    <input type="hidden" id="t-idx">
+    <label for="t-name">Tour name (shown as Job details)</label>
+    <input id="t-name" placeholder="Ten Wonders Of Kuala Lumpur SHARED Tour">
+    <p class="hint">Also used to auto-match the tour from the booking, so use the same name as on Tripadvisor.</p>
+    <label for="t-itin" style="margin-top:10px">Itinerary (one stop per line)</label>
+    <textarea id="t-itin" rows="6"></textarea>
+    <label for="t-inc" style="margin-top:10px">Inclusive (one per line)</label>
+    <textarea id="t-inc" rows="3"></textarea>
+    <div class="row" style="margin-top:10px">
+      <button class="btn primary" id="saveTour">Save tour</button>
+      <button class="btn" id="newTour">New</button>
+    </div>
+    <div class="msg" id="tourMsg"></div>
+  </div>
+  <div class="card">
+    <h2>Saved tours</h2>
+    <div id="tourList"></div>
+  </div>
+  <div class="card">
+    <h2>Backup</h2>
+    <p class="hint" style="margin-top:0">Tours and drivers are saved on this device only. Copy the backup text and keep it somewhere safe, or paste it on another phone and press Restore.</p>
+    <textarea id="backup" rows="4" style="margin-top:8px"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="btn small" id="exportBtn">Copy backup</button>
+      <button class="btn small" id="importBtn">Restore from text</button>
+    </div>
+    <div class="msg" id="backupMsg"></div>
+  </div>
+</section>
+
+<!-- ============ DRIVERS TAB ============ -->
+<section id="tab-drivers" class="hidden">
+  <div class="card">
+    <h2>Add driver</h2>
+    <p class="hint" style="margin-top:0">Optional. Saved drivers get their own one-tap button. Groups don't need adding: use the big green button and pick the group.</p>
+    <div class="grid" style="margin-top:8px">
+      <div><label for="d-name">Name</label><input id="d-name"></div>
+      <div><label for="d-num">WhatsApp number</label><input id="d-num" inputmode="tel" placeholder="012-345 6789"></div>
+    </div>
+    <div class="row" style="margin-top:10px"><button class="btn primary" id="addDriver">Add driver</button></div>
+    <div class="msg" id="driverMsg"></div>
+  </div>
+  <div class="card">
+    <h2>Saved drivers</h2>
+    <div id="driverList"></div>
+  </div>
+</section>
+</main>
+
+<script src="xlsx.full.min.js"></script>
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const KEY = 'driverJobSender.v1';
+  const JOBS_KEY = KEY + '.jobs';
+  const CUSTOM = '__custom__';
+
+  const DEFAULT_STATE = {
+    tours: [{
+      name: 'Ten Wonders Of Kuala Lumpur SHARED Tour',
+      itinerary: ['Batu caves temple','Batik factory','National mosque','Dataran merdeka','Sultan Abdul Samad building','River of life','Thean hou temple','Little India drive thru','Central Market','China town'],
+      inclusive: ['Air-conditioned vehicle','Water bottle']
+    }],
+    drivers: []
+  };
+
+  let state, jobs = [], sel = -1;
+  function load(){
+    try{ const raw = localStorage.getItem(KEY); state = raw ? JSON.parse(raw) : null; }catch(e){ state = null; }
+    if(!state || !Array.isArray(state.tours)) state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+    if(!Array.isArray(state.drivers)) state.drivers = [];
+    try{ const j = JSON.parse(localStorage.getItem(JOBS_KEY)||'null'); if(Array.isArray(j)) jobs = j; }catch(e){}
+  }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+  function saveJobs(){ try{ localStorage.setItem(JOBS_KEY, JSON.stringify(jobs)); }catch(e){} }
+  load();
+
+  /* ---------- tabs ---------- */
+  document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+    ['send','tours','drivers'].forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==b.dataset.tab));
+  }));
+
+  /* ---------- formatting helpers ---------- */
+  const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function fmtDate(iso){
+    if(!iso) return '';
+    const [y,m,d]=iso.split('-').map(Number);
+    const dt=new Date(Date.UTC(y,m-1,d));
+    return `${DAYS[dt.getUTCDay()]}, ${MONS[m-1]} ${d}, ${y}`;
+  }
+  function pad(n){return String(n).padStart(2,'0');}
+  function toISO(y,m,d){ if(!(y>1900&&m>=1&&m<=12&&d>=1&&d<=31)) return ''; return `${y}-${pad(m)}-${pad(d)}`; }
+  function parseDate(s){
+    if(!s) return '';
+    s=String(s).trim();
+    let m;
+    if((m=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/))) return toISO(+m[1],+m[2],+m[3]);
+    if((m=s.match(/(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/))){ // Malaysia style d/m/y
+      let y=+m[3]; if(y<100) y+=2000; return toISO(y,+m[2],+m[1]);
+    }
+    const mi = t => MONS.findIndex(x=>t.toLowerCase().startsWith(x.toLowerCase()));
+    if((m=s.match(/([A-Za-z]{3,})\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})/))){ const k=mi(m[1]); if(k>=0) return toISO(+m[3],k+1,+m[2]); }
+    if((m=s.match(/(\d{1,2})(?:st|nd|rd|th)?[\s\-]+([A-Za-z]{3,})\.?[\s\-,]+(\d{2,4})/))){ const k=mi(m[2]); let y=+m[3]; if(y<100)y+=2000; if(k>=0) return toISO(y,k+1,+m[1]); }
+    return '';
+  }
+  function parseTime(s){
+    if(!s) return '';
+    s=String(s);
+    let m=s.match(/\b(\d{1,2})[:.](\d{2})(?::\d{2})?\s*([ap]\.?\s?m\.?)?/i);
+    let h, min, ap;
+    if(m){ h=+m[1]; min=m[2]; ap=m[3]; }
+    else { m=s.match(/\b(\d{1,2})\s*([ap]\.?\s?m\.?)/i); if(!m) return ''; h=+m[1]; min='00'; ap=m[2]; }
+    ap = ap ? ap.replace(/[.\s]/g,'').toLowerCase() : '';
+    if(!ap){ if(h>23) return ''; ap = h>=12?'pm':'am'; if(h>12) h-=12; if(h===0) h=12; }
+    if(h>12||h<1) return '';
+    return `${h}:${min} ${ap}`;
+  }
+  function waNumber(n){
+    let d=String(n||'').replace(/[^\d+]/g,'');
+    if(d.startsWith('+')) return d.slice(1);
+    if(d.startsWith('00')) return d.slice(2);
+    if(d.startsWith('0')) return '60'+d.slice(1);  // Malaysian local number
+    return d;
+  }
+
+  /* ---------- tours ---------- */
+  function renderTourSelect(){
+    const s=$('f-tour'); s.innerHTML='';
+    state.tours.forEach((t,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=t.name; s.appendChild(o); });
+    const o=document.createElement('option'); o.value=CUSTOM; o.textContent='Other (type tour name, no itinerary)'; s.appendChild(o);
+  }
+  function words(s){ return String(s).toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(w=>w.length>2); }
+  function matchTour(name){
+    const w=new Set(words(name)); if(!w.size) return -1;
+    let best=-1, score=0;
+    state.tours.forEach((t,i)=>{
+      const tw=words(t.name); if(!tw.length) return;
+      const hit=tw.filter(x=>w.has(x)).length/Math.max(tw.length,w.size);
+      if(hit>score){score=hit;best=i;}
+    });
+    return score>=0.75?best:-1;
+  }
+  // Jobs store the tour by name, so editing/reordering tours never points a job at the wrong one.
+  function tourOf(job){
+    if(job.tour===CUSTOM || job.tour===undefined) return {name:job.custom||'',itinerary:[],inclusive:[],missing:true};
+    const t=state.tours.find(t=>t.name===job.tour);
+    return t ? t : {name:job.tour,itinerary:[],inclusive:[],missing:true};
+  }
+
+  /* ---------- message ---------- */
+  function buildMessage(job){
+    const a=+job.adults||0, c=+job.children||0;
+    const pax=[a?`${a} Adult${a>1?'s':''}`:'', c?`${c} Child${c>1?'ren':''}`:''].filter(Boolean).join(', ');
+    const tour=tourOf(job);
+    const L=[];
+    L.push(`Booking ID=${(job.id||'').trim()}`,'');
+    L.push(`Date: ${fmtDate(job.date)}`);
+    L.push(`Time: ${(job.time||'').trim()}`);
+    L.push(`Pax: ${pax}`,'');
+    L.push(`Job details: *${tour.name}*`,'');
+    L.push(`Pick up: ${(job.pickup||'').trim()}`);
+    L.push(`Name: ${(job.name||'').trim()}`);
+    L.push(`Hp no: ${(job.hp||'').trim()}`);
+    if(tour.itinerary.length){ L.push('','Itinerary:-'); tour.itinerary.forEach((x,i)=>L.push(`${i+1}) ${x}`)); }
+    if(tour.inclusive.length){ L.push('','Inclusive:-'); tour.inclusive.forEach((x,i)=>L.push(`${i+1}) ${x}`)); }
+    const jn=String(job.job||'').trim();
+    if(jn){ L.push('','',`Job ${jn}`); }
+    return L.join('\n');
+  }
+
+  /* ---------- job list ---------- */
+  function blankJob(){ return {id:'',job:'',date:'',time:'',adults:'2',children:'0',tour:state.tours[0]?state.tours[0].name:CUSTOM,custom:'',pickup:'',name:'',hp:'',sent:''}; }
+
+  function renderJobs(){
+    const box=$('jobList'); box.innerHTML='';
+    const sentN=jobs.filter(j=>j.sent).length;
+    $('jobCount').textContent = jobs.length ? `${jobs.length} job${jobs.length>1?'s':''} · ${sentN} sent` : '';
+    if(!jobs.length){ box.innerHTML='<p class="hint">No jobs yet. Upload the booking sheet above.</p>'; }
+    jobs.forEach((job,i)=>{
+      const msg=buildMessage(job), enc=encodeURIComponent(msg), tour=tourOf(job);
+      const card=document.createElement('div');
+      card.className='job'+(i===sel?' sel':'')+(job.sent?' sent':'');
+      const title=[job.date?fmtDate(job.date):'No date', job.time].filter(Boolean).join(' · ');
+      card.innerHTML=`
+        <div class="top">
+          <div><div class="title"></div><div class="meta"></div></div>
+          <span class="badge"></span>
+        </div>
+        <pre class="${i===sel?'':'hidden'}"></pre>
+        <div class="acts" style="margin-top:10px"></div>`;
+      card.querySelector('.title').textContent=`${job.job?'Job '+job.job+' — ':''}${title}`;
+      card.querySelector('.meta').textContent=[tour.name||'No tour', job.name, job.pickup, job.id?'#'+job.id:''].filter(Boolean).join(' · ');
+      const badge=card.querySelector('.badge');
+      if(job.sent){ badge.textContent='Sent ✓'+(job.sent==='via WhatsApp'?'':' → '+job.sent); badge.classList.add('ok'); }
+      else if(tour.missing){ badge.textContent='Tour not in list'; badge.classList.add('warn'); }
+      else if(!(job.pickup||'').trim()){ badge.textContent='No pickup'; badge.classList.add('warn'); }
+      else badge.textContent='Not sent';
+      card.querySelector('pre').textContent=msg;
+
+      const acts=card.querySelector('.acts');
+      const mk=(label,href,who)=>{
+        const a=document.createElement('a'); a.className='btn wa'; a.target='_blank'; a.rel='noopener';
+        a.href=href; a.textContent=label;
+        a.addEventListener('click',()=>{ job.sent=who; saveJobs(); setTimeout(renderJobs,50); });
+        acts.appendChild(a);
+      };
+      mk('Send → choose', 'https://wa.me/?text='+enc, 'via WhatsApp');
+      state.drivers.forEach(d=>mk('→ '+d.name, `https://wa.me/${waNumber(d.number)}?text=${enc}`, d.name));
+      const ed=document.createElement('button'); ed.className='btn'; ed.textContent= i===sel ? 'Hide' : 'View / edit';
+      ed.onclick=()=>select(i===sel?-1:i); acts.appendChild(ed);
+      if(job.sent){
+        const un=document.createElement('button'); un.className='btn'; un.textContent='Mark not sent';
+        un.onclick=()=>{ job.sent=''; saveJobs(); renderJobs(); }; acts.appendChild(un);
+      }
+      const del=document.createElement('button'); del.className='btn danger'; del.textContent='Remove';
+      del.onclick=()=>{ if(del.dataset.c){ jobs.splice(i,1); if(sel===i) sel=-1; else if(sel>i) sel--; saveJobs(); renderJobs(); fillForm(); } else { del.dataset.c=1; del.textContent='Tap again'; } };
+      acts.appendChild(del);
+      box.appendChild(card);
+    });
+  }
+
+  const FIELDS=['id','job','date','time','adults','children','tour','custom','pickup','name','hp'];
+  function select(i){ sel=i; fillForm(); renderJobs(); if(i>=0 && $('editCard').scrollIntoView) $('editCard').scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  function fillForm(){
+    const on=sel>=0 && jobs[sel];
+    $('editCard').classList.toggle('hidden',!on);
+    if(!on) return;
+    const job=jobs[sel];
+    $('editTitle').textContent=`Edit job ${job.job||sel+1}`;
+    renderTourSelect();
+    FIELDS.forEach(f=>{
+      if(f==='tour'){
+        const idx=state.tours.findIndex(t=>t.name===job.tour);
+        $('f-tour').value = idx>=0 ? String(idx) : CUSTOM;
+        if(idx<0 && job.tour && job.tour!==CUSTOM && !job.custom) job.custom=job.tour;
+      } else $('f-'+f).value = job[f]||'';
+    });
+    $('customWrap').classList.toggle('hidden',$('f-tour').value!==CUSTOM);
+  }
+  function readFormInto(job){
+    FIELDS.forEach(f=>{
+      if(f==='tour'){ const v=$('f-tour').value; job.tour = v===CUSTOM ? CUSTOM : state.tours[+v].name; }
+      else job[f]=$('f-'+f).value;
+    });
+  }
+  document.querySelectorAll('#editCard input, #editCard select').forEach(el=>{
+    const h=()=>{ if(sel<0||!jobs[sel]) return; readFormInto(jobs[sel]); $('customWrap').classList.toggle('hidden',$('f-tour').value!==CUSTOM); saveJobs(); renderJobs(); };
+    el.addEventListener('input',h); el.addEventListener('change',h);
+  });
+
+  /* ---------- parsing ---------- */
+  const FIELD_KEYS = {
+    id:['booking ref','booking id','booking reference','booking number','booking no','reference','confirmation','ref'],
+    date:['travel date','tour date','activity date','date of travel','service date','date'],
+    time:['start time','pickup time','pick up time','tour time','departure time','time'],
+    adults:['adult'],
+    seniors:['senior'],
+    children:['child'],
+    youths:['youth'],
+    infants:['infant'],
+    pax:['travelers','travellers','traveler count','pax','participants','guests','passengers','number of travelers'],
+    status:['status','booking status'],
+    tour:['product name','tour name','product title','activity name','product','tour','activity'],
+    grade:['tour grade','option name','product option','tour option','option','grade'],
+    pickup:['pickup location','pick up location','hotel pickup','pickup point','pickup','pick up','hotel','meeting point'],
+    name:['lead traveler name','lead traveller name','lead traveler','lead traveller','customer name','traveler name','guest name','full name','name'],
+    first:['first name'], last:['last name','surname'],
+    phone:['lead traveler contact info','lead traveller contact info','contact info','phone number','mobile number','contact number','phone','mobile','telephone','hp','contact'],
+    jobno:['job no','job number','job #','job'],
+    arrTime:['arrival time'], arrFlight:['arrival flight'], arrAirline:['arrival airline'], arrDrop:['arrival drop'],
+    depPick:['departure pickup','departure pick up'], depTime:['departure time'], depFlight:['departure flight'], depDate:['departure date']
+  };
+  function classify(label){
+    const l=String(label==null?'':label).toLowerCase().replace(/[_:*]/g,' ').replace(/\s+/g,' ').trim();
+    classify.len=0;
+    if(!l || l.length>60) return null;
+    // channel / language / code columns would otherwise be mistaken for phone / tour
+    if(/channel|language|code\b/.test(l)) return null;
+    let best=null, len=0;
+    for(const [f,keys] of Object.entries(FIELD_KEYS)) for(const k of keys){
+      if(l.includes(k) && k.length>len){ best=f; len=k.length; }
+    }
+    if(best==='date' && /book|purchase|created|order/.test(l)) return null;
+    if(best==='id' && /product|tour|option/.test(l)) return null;
+    if(best==='jobno' && /detail/.test(l)) return null;
+    if(/arrival|departure/.test(l) && !/^(arr|dep)[A-Z]/.test(best||'')) return null;
+    classify.len=len;
+    return best;
+  }
+  function recordToJob(rec){
+    const job=blankJob();
+    const v=x=>x!==undefined && String(x).trim()!=='' ? String(x).trim() : '';
+    if(v(rec.id)) job.id=v(rec.id).replace(/^#/,'');
+    if(v(rec.jobno)) job.job=v(rec.jobno).replace(/^job\s*/i,'');
+    if(v(rec.date)){ job.date=parseDate(rec.date); const t=parseTime(String(rec.date).replace(/^.*?\d{4}/,'')); if(t) job.time=t; }
+    if(v(rec.time)) job.time=parseTime(rec.time)||v(rec.time);
+    else if(!job.time && v(rec.grade)){ const t=parseTime(rec.grade); if(t) job.time=t; }
+    const num0=x=>{ const n=String(x==null?'':x).match(/\d+/); return n?+n[0]:0; };
+    let adults=rec.adults, children=rec.children;
+    if(rec.seniors!==undefined) adults=num0(adults)+num0(rec.seniors);
+    if(rec.youths!==undefined || rec.infants!==undefined) children=num0(children)+num0(rec.youths)+num0(rec.infants);
+    if(v(rec.pax)){
+      const a=rec.pax.match(/(\d+)\s*adult/i), c=rec.pax.match(/(\d+)\s*(child|youth|infant)/i);
+      if(a) adults=a[1]; if(c) children=c[1];
+      if(!a && !c && rec.adults===undefined && rec.seniors===undefined){ const n=String(rec.pax).match(/\d+/); if(n) adults=n[0]; }
+    }
+    const num=x=>{ const n=String(x==null?'':x).match(/\d+/); return n?n[0]:''; };
+    if(num(adults)) job.adults=num(adults);
+    job.children=num(children)||'0';
+    job.name=v(rec.name)||[v(rec.first),v(rec.last)].filter(Boolean).join(' ');
+    job.pickup=v(rec.pickup);
+    // contact info may hold "Phone: … Email: …" — keep just the phone number if one is there
+    const ph=v(rec.phone).match(/\+?\d[\d\s\-()]{6,}\d/);
+    job.hp = ph ? ph[0].trim() : (v(rec.phone).includes('@') ? '' : v(rec.phone));
+    // airport transfers: build pickup/time from the flight columns when there's no hotel pickup
+    if(!job.pickup && (v(rec.arrFlight)||v(rec.arrAirline))){
+      job.pickup=`Airport arrival – ${[v(rec.arrAirline),v(rec.arrFlight)].filter(Boolean).join(' ')}`+(v(rec.arrDrop)?` → drop at ${v(rec.arrDrop)}`:'');
+      if(!job.time && v(rec.arrTime)){ const t=parseTime(rec.arrTime); job.time=t?`${t} (flight lands)`:v(rec.arrTime); }
+    } else if(!job.pickup && v(rec.depPick)){
+      const fl=[v(rec.depFlight), v(rec.depTime)?'dep '+(parseTime(rec.depTime)||v(rec.depTime)):''].filter(Boolean).join(', ');
+      job.pickup=`${v(rec.depPick)} → airport`+(fl?` (flight ${fl})`:'');
+    }
+    if(v(rec.tour)){
+      const i=matchTour(rec.tour);
+      if(i>=0) job.tour=state.tours[i].name; else { job.tour=CUSTOM; job.custom=v(rec.tour); }
+    }
+    return job;
+  }
+  function isEmptyJob(j){ return !j.id && !j.date && !j.name && !j.pickup; }
+
+  // cell → text; Date objects from Excel become ISO date / time text
+  function cellText(c){
+    if(c instanceof Date){
+      if(isNaN(c)) return '';
+      if(c.getFullYear()<1901) return `${pad(c.getHours())}:${pad(c.getMinutes())}`;
+      const d=`${c.getFullYear()}-${pad(c.getMonth()+1)}-${pad(c.getDate())}`;
+      return (c.getHours()||c.getMinutes()) ? `${d} ${pad(c.getHours())}:${pad(c.getMinutes())}` : d;
+    }
+    return c==null ? '' : String(c);
+  }
+  // find header row (first row in the top 15 with ≥2 recognised columns) and turn the rest into jobs
+  function jobsFromRows(rows){
+    rows=rows.map(r=>(r||[]).map(cellText));
+    let h=-1;
+    for(let i=0;i<Math.min(rows.length,15);i++){ if(rows[i].filter(c=>classify(c)).length>=2){ h=i; break; } }
+    if(h<0) return null;
+    const header=rows[h];
+    const out=[]; let skipped=0;
+    for(const row of rows.slice(h+1)){
+      if(!row.some(c=>String(c).trim())) continue;
+      const rec={}, score={};
+      header.forEach((hd,i)=>{ const f=classify(hd), sc=classify.len;
+        if(!f || row[i]===undefined || String(row[i]).trim()==='') return;
+        if(f==='grade' && rec.grade!==undefined){ rec.grade+=' '+row[i]; return; }
+        if(rec[f]===undefined || sc>score[f]){ rec[f]=row[i]; score[f]=sc; } });
+      if(rec.status && /cancel/i.test(rec.status)){ skipped++; continue; }
+      const job=recordToJob(rec);
+      if(!isEmptyJob(job)) out.push(job);
+    }
+    return {jobs:out, header, skipped};
+  }
+  function recordFromText(text){
+    const rec={}; const lines=text.split(/\r?\n/).map(s=>s.trim());
+    for(let i=0;i<lines.length;i++){
+      const line=lines[i]; if(!line) continue;
+      let k,v; const m=line.match(/^([^:\t]{2,40})[:\t]\s*(.*)$/);
+      if(m){ k=m[1]; v=m[2]; if(!v && lines[i+1]){ v=lines[i+1]; } }
+      else if(line.length<40 && lines[i+1] && classify(line)){ k=line; v=lines[i+1]; }
+      if(!k||!v) continue;
+      const f=classify(k); if(f && rec[f]===undefined) rec[f]=v;
+    }
+    return rec;
+  }
+
+  function addJobs(newJobs, source, skipped){
+    const msg=$('parseMsg'); msg.className='msg';
+    const sk = skipped ? ` Skipped ${skipped} cancelled booking${skipped>1?'s':''}.` : '';
+    if(!newJobs.length){ msg.className='msg warn'; msg.textContent=`No bookings found in ${source}.`+sk; return; }
+    // auto-number jobs that don't have a number, continuing from the list
+    let n = jobs.reduce((m,j)=>Math.max(m, +j.job||0), 0);
+    newJobs.forEach(j=>{ if(!j.job) j.job=String(++n); });
+    jobs=jobs.concat(newJobs); saveJobs(); sel=-1; fillForm(); renderJobs();
+    const missing=newJobs.filter(j=>tourOf(j).missing).length;
+    msg.textContent=`Added ${newJobs.length} job${newJobs.length>1?'s':''} from ${source}.`+(missing?` ${missing} with a tour not in your Tours list (no itinerary added).`:'')+sk;
+  }
+
+  /* ---------- file upload ---------- */
+  function handleFile(f){
+    if(!f) return;
+    const msg=$('parseMsg');
+    if(typeof XLSX==='undefined'){ msg.className='msg warn'; msg.textContent="The Excel reader didn't load. Close and reopen the app."; return; }
+    const r=new FileReader();
+    r.onload=e=>{
+      try{
+        const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+        let res=null;
+        for(const name of wb.SheetNames){
+          const rows=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,raw:true,defval:''});
+          const got=jobsFromRows(rows);
+          if(got && (got.jobs.length||got.skipped)){ res=got; break; }
+        }
+        if(!res){ msg.className='msg warn'; msg.textContent="Couldn't recognise the columns in that sheet. Send the header row to whoever set this up."; return; }
+        addJobs(res.jobs, f.name, res.skipped);
+      }catch(err){ msg.className='msg warn'; msg.textContent="Couldn't read that file. Is it an Excel or CSV file?"; }
+      $('file').value='';
+    };
+    r.readAsArrayBuffer(f);
+  }
+  $('file').addEventListener('change',e=>handleFile(e.target.files[0]));
+  const drop=$('drop');
+  ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over');}));
+  drop.addEventListener('drop',e=>handleFile(e.dataTransfer.files[0]));
+
+  /* ---------- paste ---------- */
+  $('parseBtn').addEventListener('click',()=>{
+    const text=$('paste').value; const msg=$('parseMsg');
+    if(!text.trim()){ msg.className='msg warn'; msg.textContent='Paste something first.'; return; }
+    const rows=text.split(/\r?\n/).filter(l=>l.trim()!=='').map(l=>l.split('\t'));
+    if(rows.length>=2 && rows[0].length>=3){
+      const got=jobsFromRows(rows);
+      if(got){ addJobs(got.jobs,'paste',got.skipped); $('paste').value=''; return; }
+    }
+    const job=recordToJob(recordFromText(text));
+    if(isEmptyJob(job)){ msg.className='msg warn'; msg.textContent="Couldn't find booking details in that text. Use “Add a job by hand” instead."; return; }
+    addJobs([job],'paste'); $('paste').value='';
+  });
+
+  $('addManual').addEventListener('click',()=>{
+    const j=blankJob(); j.job=String(jobs.reduce((m,x)=>Math.max(m,+x.job||0),0)+1);
+    jobs.push(j); saveJobs(); select(jobs.length-1);
+  });
+  $('clearBtn').addEventListener('click',()=>{
+    const b=$('clearBtn');
+    if(!b.dataset.c){ b.dataset.c=1; b.textContent='Tap again to clear all jobs'; setTimeout(()=>{delete b.dataset.c;b.textContent='Clear list';},3000); return; }
+    jobs=[]; sel=-1; saveJobs(); fillForm(); renderJobs(); $('parseMsg').textContent='';
+    delete b.dataset.c; b.textContent='Clear list';
+  });
+
+  $('copyBtn').addEventListener('click',async()=>{
+    const m=$('sendMsg');
+    if(sel<0){ m.textContent='Tap “View / edit” on a job first.'; return; }
+    try{ await navigator.clipboard.writeText(buildMessage(jobs[sel])); m.textContent='Copied.'; }
+    catch(e){ m.textContent="Couldn't copy here. Use the send button instead."; }
+  });
+
+  /* ---------- tours tab ---------- */
+  const lines = s => s.split(/\r?\n/).map(x=>x.replace(/^\s*\d+[).]\s*/,'').trim()).filter(Boolean);
+  function renderTours(){
+    const box=$('tourList'); box.innerHTML='';
+    if(!state.tours.length){ box.innerHTML='<p class="hint">No tours yet.</p>'; }
+    state.tours.forEach((t,i)=>{
+      const d=document.createElement('div'); d.className='list-item';
+      d.innerHTML=`<div class="head"><strong></strong><span class="row"><button class="btn small" data-e>Edit</button><button class="btn small danger" data-d>Delete</button></span></div><div class="hint"></div>`;
+      d.querySelector('strong').textContent=t.name;
+      d.querySelector('.hint').textContent=`${t.itinerary.length} stops · ${t.inclusive.length} inclusions`;
+      d.querySelector('[data-e]').onclick=()=>{ $('t-idx').value=i; $('t-name').value=t.name; $('t-itin').value=t.itinerary.join('\n'); $('t-inc').value=t.inclusive.join('\n'); $('t-name').focus(); };
+      d.querySelector('[data-d]').onclick=()=>{
+        if(d.dataset.confirm){ state.tours.splice(i,1); save(); afterToursChange(); }
+        else { d.dataset.confirm=1; d.querySelector('[data-d]').textContent='Tap again to delete'; }
+      };
+      box.appendChild(d);
+    });
+  }
+  function afterToursChange(){
+    // re-match jobs whose tour wasn't found before
+    jobs.forEach(j=>{ if(j.tour===CUSTOM && j.custom){ const i=matchTour(j.custom); if(i>=0){ j.tour=state.tours[i].name; j.custom=''; } } });
+    saveJobs(); renderTours(); fillForm(); renderJobs();
+  }
+  $('saveTour').addEventListener('click',()=>{
+    const name=$('t-name').value.trim();
+    if(!name){ $('tourMsg').textContent='Give the tour a name.'; $('tourMsg').className='msg warn'; return; }
+    const t={name,itinerary:lines($('t-itin').value),inclusive:lines($('t-inc').value)};
+    const idx=$('t-idx').value;
+    if(idx!==''){ const old=state.tours[+idx].name; state.tours[+idx]=t; jobs.forEach(j=>{ if(j.tour===old) j.tour=name; }); }
+    else state.tours.push(t);
+    save(); afterToursChange();
+    $('tourMsg').className='msg'; $('tourMsg').textContent='Saved.';
+    $('newTour').click();
+  });
+  $('newTour').addEventListener('click',()=>{ $('t-idx').value=''; $('t-name').value=''; $('t-itin').value=''; $('t-inc').value=''; });
+
+  $('exportBtn').addEventListener('click',async()=>{
+    const txt=JSON.stringify(state); $('backup').value=txt;
+    try{ await navigator.clipboard.writeText(txt); $('backupMsg').textContent='Backup copied.'; }
+    catch(e){ $('backup').select(); $('backupMsg').textContent='Backup text is in the box. Copy it from there.'; }
+  });
+  $('importBtn').addEventListener('click',()=>{
+    try{
+      const s=JSON.parse($('backup').value);
+      if(!Array.isArray(s.tours)) throw 0;
+      state={tours:s.tours,drivers:Array.isArray(s.drivers)?s.drivers:[]};
+      save(); renderDrivers(); afterToursChange();
+      $('backupMsg').className='msg'; $('backupMsg').textContent='Restored.';
+    }catch(e){ $('backupMsg').className='msg warn'; $('backupMsg').textContent="That doesn't look like a backup from this page."; }
+  });
+
+  /* ---------- drivers tab ---------- */
+  function renderDrivers(){
+    const box=$('driverList'); box.innerHTML='';
+    if(!state.drivers.length){ box.innerHTML='<p class="hint">No drivers saved.</p>'; }
+    state.drivers.forEach((dr,i)=>{
+      const d=document.createElement('div'); d.className='list-item';
+      d.innerHTML=`<div class="head"><span><strong></strong><div class="hint"></div></span><button class="btn small danger">Remove</button></div>`;
+      d.querySelector('strong').textContent=dr.name;
+      d.querySelector('.hint').textContent=dr.number+'  →  wa.me/'+waNumber(dr.number);
+      d.querySelector('button').onclick=()=>{ state.drivers.splice(i,1); save(); renderDrivers(); renderJobs(); };
+      box.appendChild(d);
+    });
+  }
+  $('addDriver').addEventListener('click',()=>{
+    const name=$('d-name').value.trim(), number=$('d-num').value.trim();
+    if(!name||waNumber(number).length<8){ $('driverMsg').className='msg warn'; $('driverMsg').textContent='Enter a name and a full phone number.'; return; }
+    state.drivers.push({name,number}); save(); renderDrivers(); renderJobs();
+    $('d-name').value=''; $('d-num').value=''; $('driverMsg').className='msg'; $('driverMsg').textContent='Added.';
+  });
+
+  /* ---------- init ---------- */
+  renderTourSelect(); renderTours(); renderDrivers(); fillForm(); renderJobs();
+})();
+</script>
+<script>
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
+</script>
+</body>
+</html>
